@@ -11,6 +11,7 @@ const useTimer = () => {
   const [limitTime, setLimitTime] = useState(60);
   const [elapsedTimeInMs, setElapsedTimeInMs] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [finished, setIsFinished] = useState(false);
   const startTime = useRef<number | null>(null);
   const pausedTime = useRef<number | null>(null);
 
@@ -22,8 +23,10 @@ const useTimer = () => {
   const minutes = Math.floor(elapsedTimeInSeconds / 60);
 
   const value = `${minutes}:${secondTens}${secondUnits}`;
+  const progress = (elapsedTimeInMs / (limitTime * 1000)) * 100;
 
   const play = useCallback(() => {
+    setIsFinished(false);
     setIsPlaying(true);
     if (intervalId.current) {
       return;
@@ -58,6 +61,7 @@ const useTimer = () => {
   }, []);
 
   const restart = useCallback(() => {
+    setIsFinished(false);
     setIsPlaying(false);
     removeInterval();
 
@@ -77,6 +81,7 @@ const useTimer = () => {
   }, [limitTime]);
 
   const reset = useCallback(() => {
+    setIsFinished(false);
     setIsPlaying(false);
     removeInterval();
     startTime.current = null;
@@ -87,6 +92,7 @@ const useTimer = () => {
 
   const finishTime = useCallback(() => {
     setIsPlaying(false);
+    setIsFinished(true);
     removeInterval();
     startTime.current = null;
     pausedTime.current = null;
@@ -128,11 +134,11 @@ const useTimer = () => {
     pause,
     restart,
     reset,
-    finishTime,
-    value,
     setLimitTime,
+    finished,
+    value,
     limitTime,
-    isPlaying,
+    progress
   };
 };
 

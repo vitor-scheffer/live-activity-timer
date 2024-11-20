@@ -1,8 +1,9 @@
 import { View, Text, Button } from "react-native";
 import useTimer from "../hooks/useTimer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CustomPicker from "../components/picker";
 import RoundedButton from "../components/iconButton";
+import CircularProgress from "../components/circularProgress";
 
 const PICKER_ITEMS = [
   {
@@ -28,7 +29,8 @@ const PICKER_ITEMS = [
 ];
 
 export default function Home() {
-  const { play, pause, restart, reset, setLimitTime, value } = useTimer();
+  const { play, pause, restart, reset, progress, finished, setLimitTime, value } =
+    useTimer();
   const [selectedValue, setSelectedValue] = useState(60);
 
   const handleValueChange = (itemValue: number) => {
@@ -46,9 +48,14 @@ export default function Home() {
         paddingHorizontal: 32,
       }}
     >
-      <Text style={{ fontSize: 34, fontWeight: 600, marginBottom: 10}}>
-        {value}
-      </Text>
+      <CircularProgress
+        size={150}
+        strokeWidth={10}
+        progress={progress}
+        circleColor="#ddd"
+        progressColor="#4caf50"
+        text={finished ? "Done!" : value}
+      />
 
       <View
         style={{
