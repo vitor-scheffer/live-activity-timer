@@ -7,6 +7,8 @@ const TimerEventEmitter = new NativeEventEmitter(
   NativeModules.TimerEventEmitter as NativeModule
 );
 
+const LIMIT_TIME = 10;
+
 const useTimer = () => {
   const [elapsedTimeInMs, setElapsedTimeInMs] = React.useState(0);
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -38,7 +40,7 @@ const useTimer = () => {
       pausedTime.current = null;
       TimerWidgetModule.resume();
     } else {
-      TimerWidgetModule.startLiveActivity(startTime.current / 1000);
+      TimerWidgetModule.startLiveActivity(startTime.current / 1000, LIMIT_TIME);
     }
 
     intervalId.current = setInterval(() => {
@@ -66,7 +68,7 @@ const useTimer = () => {
 
     TimerWidgetModule.stopLiveActivity();
 
-    TimerWidgetModule.startLiveActivity(startTime.current / 1000);
+    TimerWidgetModule.startLiveActivity(startTime.current / 1000, LIMIT_TIME);
 
     intervalId.current = setInterval(() => {
       setElapsedTimeInMs(Date.now() - startTime.current!);
@@ -101,7 +103,10 @@ const useTimer = () => {
       restart
     );
     const resetSubscription = TimerEventEmitter.addListener("onReset", reset);
-    const finishTimeSubscription = TimerEventEmitter.addListener("onFinish", finishTime);
+    const finishTimeSubscription = TimerEventEmitter.addListener(
+      "onFinish",
+      finishTime
+    );
 
     return () => {
       pauseSubscription.remove();
