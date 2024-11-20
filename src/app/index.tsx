@@ -1,40 +1,42 @@
-import { View, Text, Button } from "react-native";
+import { StatusBar, View } from "react-native";
 import useTimer from "../hooks/useTimer";
-import { useEffect, useState } from "react";
-import CustomPicker from "../components/picker";
+import { useState } from "react";
 import RoundedButton from "../components/iconButton";
 import CircularProgress from "../components/circularProgress";
 
-const PICKER_ITEMS = [
+export const PICKER_ITEMS = [
   {
-    label: "5 segundos",
+    label: "5 Seconds",
     value: 5,
   },
   {
-    label: "10 segundos",
+    label: "10 Seconds",
     value: 10,
   },
   {
-    label: "15 segundos",
+    label: "15 Seconds",
     value: 15,
   },
   {
-    label: "20 segundos",
-    value: 20,
-  },
-  {
-    label: "60 segundos",
+    label: "60 Seconds",
     value: 60,
   },
 ];
 
 export default function Home() {
-  const { play, pause, restart, reset, progress, finished, setLimitTime, value } =
-    useTimer();
-  const [selectedValue, setSelectedValue] = useState(60);
+  const {
+    play,
+    pause,
+    restart,
+    reset,
+    progress,
+    isFinished,
+    isPlaying,
+    setLimitTime,
+    value,
+  } = useTimer();
 
   const handleValueChange = (itemValue: number) => {
-    setSelectedValue(itemValue);
     setLimitTime(itemValue);
   };
 
@@ -44,51 +46,62 @@ export default function Home() {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#FFFFFF",
+        backgroundColor: "#000000",
         paddingHorizontal: 32,
       }}
     >
+      <StatusBar barStyle={"light-content"} backgroundColor="#000" />
       <CircularProgress
-        size={150}
-        strokeWidth={10}
+        size={250}
+        strokeWidth={6}
         progress={progress}
-        circleColor="#ddd"
-        progressColor="#4caf50"
-        text={finished ? "Done!" : value}
+        circleColor="#16bbc73b"
+        progressColor="#16bbc7"
+        text={isFinished ? "Done!" : value}
+        onLimitValueChange={(value: number) => handleValueChange(value)}
       />
 
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
-          justifyContent: "center",
-          gap: 5,
+          justifyContent: "space-between",
+          width: "100%",
           marginBottom: 40,
         }}
       >
-        <RoundedButton iconName="play" onPress={play} />
-        <RoundedButton iconName="pause" onPress={pause} />
-        <RoundedButton iconName="rotate-ccw" onPress={restart} />
-        <RoundedButton iconName="x" onPress={reset} />
+        {isPlaying ? (
+          <RoundedButton
+            title="Pause"
+            onPress={pause}
+            tintColor={"#16bbc7"}
+            bgColor={"#16bbc73b"}
+          />
+        ) : (
+          <RoundedButton
+            title="Play"
+            onPress={play}
+            tintColor={"#16bbc7"}
+            bgColor={"#16bbc73b"}
+          />
+        )}
+
+        {isPlaying ? (
+          <RoundedButton
+            title="Restart"
+            onPress={restart}
+            tintColor={"#d9e3e3"}
+            bgColor={"#d9e3e327"}
+          />
+        ) : (
+          <RoundedButton
+            title="Close"
+            onPress={reset}
+            tintColor={"#c71916"}
+            bgColor={"#c719163a"}
+          />
+        )}
       </View>
-
-      <Text
-        style={{
-          fontSize: 12,
-          fontWeight: 300,
-          marginBottom: 4,
-          textAlign: "left",
-          width: "100%",
-        }}
-      >
-        Selecione um tempo limite
-      </Text>
-
-      <CustomPicker
-        items={PICKER_ITEMS}
-        onValueChange={(item) => handleValueChange(item)}
-        selectedItem={selectedValue}
-      />
     </View>
   );
 }

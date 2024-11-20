@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import Svg, { Circle } from "react-native-svg";
+import CustomPicker from "./picker";
+import { PICKER_ITEMS } from "../app";
 
 type CircularProgressProps = {
   size: number;
@@ -10,6 +12,7 @@ type CircularProgressProps = {
   progressColor: string;
   text?: string;
   textStyle?: object;
+  onLimitValueChange: (value: number) => void;
 };
 
 const CircularProgress: React.FC<CircularProgressProps> = ({
@@ -20,10 +23,11 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
   progressColor,
   text,
   textStyle,
+  onLimitValueChange,
 }) => {
+  const [selectedValue, setSelectedValue] = useState(60);
   const radius = size / 2 - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
-
   const offset = circumference - (progress / 100) * circumference;
 
   return (
@@ -56,6 +60,17 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
       </Svg>
 
       {text && <Text style={[styles.text, textStyle]}>{text}</Text>}
+
+      <View style={styles.pickerContainer}>
+        <CustomPicker
+          items={PICKER_ITEMS}
+          onValueChange={(item) => {
+            onLimitValueChange(item);
+            setSelectedValue(item);
+          }}
+          selectedItem={selectedValue}
+        />
+      </View>
     </View>
   );
 };
@@ -69,8 +84,16 @@ const styles = StyleSheet.create({
   },
   text: {
     position: "absolute",
-    fontWeight: 700,
+    fontWeight: "300",
     fontSize: 24,
+    color: "#FFFFFF",
+    top: "40%",
+  },
+  pickerContainer: {
+    position: "absolute",
+    top: "65%",
+    alignItems: "center",
+    width: "50%",
   },
 });
 

@@ -1,5 +1,13 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  FlatList,
+} from "react-native";
+import Feather from "react-native-vector-icons/Feather"
 
 type CustomPickerProps = {
   items: { label: string; value: number }[];
@@ -38,14 +46,18 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      {/* Picker Header */}
-      <TouchableOpacity style={styles.selectedItemContainer} onPress={toggleModal}>
+      <TouchableOpacity
+        style={styles.selectedItemContainer}
+        onPress={toggleModal}
+      >
         <Text style={styles.selectedItemText}>
-          {selectedItem ? items.find((i) => i.value === selectedItem)?.label : placeholder}
+          {selectedItem
+            ? items.find((i) => i.value === selectedItem)?.label
+            : placeholder}
         </Text>
+        <Feather name="chevron-down" color="#16bbc7"/>
       </TouchableOpacity>
 
-      {/* Modal for Item List */}
       <Modal visible={isModalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
@@ -54,12 +66,6 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
               renderItem={renderItem}
               keyExtractor={(item) => item.value.toString()}
             />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -69,37 +75,41 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%"
+    width: "100%",
   },
   selectedItemContainer: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "#FFFFFF",
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+    backgroundColor: "#16bbc73b",
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#000",
+    flexDirection: "row",
+    gap: 4,
+    justifyContent: "center",
+    alignItems: "center",
   },
   selectedItemText: {
-    fontSize: 16,
-    color: "#333",
+    fontSize: 14,
+    color: "#16bbc7",
   },
   modalOverlay: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-end",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(87, 87, 87, 0.202)",
   },
   modalContainer: {
-    backgroundColor: "white",
+    backgroundColor: "rgba(0, 0, 0, 0.688)",
     padding: 20,
     borderRadius: 8,
-    width: "80%",
-    maxHeight: "60%",
+    width: "100%",
+    maxHeight: "40%",
   },
   item: {
     paddingVertical: 12,
     paddingHorizontal: 16,
-    marginBottom: 3,
+    marginBottom: 4,
     borderRadius: 4,
     justifyContent: "center",
     alignItems: "center",
@@ -107,18 +117,7 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 16,
-    color: "#333",
-  },
-  closeButton: {
-    paddingVertical: 12,
-    backgroundColor: "#11ceeb",
-    borderRadius: 8,
-    marginTop: 16,
-    alignItems: "center",
-  },
-  closeButtonText: {
-    color: "white",
-    fontSize: 16,
+    color: "#16bbc7",
   },
 });
 

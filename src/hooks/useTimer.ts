@@ -11,7 +11,7 @@ const useTimer = () => {
   const [limitTime, setLimitTime] = useState(60);
   const [elapsedTimeInMs, setElapsedTimeInMs] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [finished, setIsFinished] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
   const startTime = useRef<number | null>(null);
   const pausedTime = useRef<number | null>(null);
 
@@ -135,7 +135,8 @@ const useTimer = () => {
     restart,
     reset,
     setLimitTime,
-    finished,
+    isFinished,
+    isPlaying,
     value,
     limitTime,
     progress

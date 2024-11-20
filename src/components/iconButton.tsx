@@ -3,29 +3,30 @@ import {
   TouchableOpacity,
   TouchableOpacityProps,
   StyleSheet,
+  Text
 } from "react-native";
-import Feather from "react-native-vector-icons/Feather";
 
 interface RoundedButtonProps extends TouchableOpacityProps {
-  iconName: string;
+  title: string;
+  tintColor: string;
+  bgColor: string;
 }
 
-const RoundedButton = ({ iconName, ...rest }: RoundedButtonProps) => {
+const RoundedButton = ({ title, tintColor, bgColor, ...rest }: RoundedButtonProps) => {
   return (
-    <TouchableOpacity style={styles.button} {...rest}>
-      <Feather name={iconName} size={24} color="#000" />
+    <TouchableOpacity style={[styles.button, {backgroundColor: bgColor}]} {...rest}>
+      <Text style={{ fontSize: 10, fontWeight: 500, color: tintColor}}>{title}</Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   button: {
-    width: 38,
-    height: 38,
-    borderRadius: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "transparent",
   },
 });
 
