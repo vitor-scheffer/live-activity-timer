@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { NativeEventEmitter, NativeModule, NativeModules } from "react-native";
 
 const { TimerWidgetModule } = NativeModules;
@@ -7,15 +7,14 @@ const TimerEventEmitter = new NativeEventEmitter(
   NativeModules.TimerEventEmitter as NativeModule
 );
 
-const LIMIT_TIME = 10;
-
 const useTimer = () => {
-  const [elapsedTimeInMs, setElapsedTimeInMs] = React.useState(0);
-  const [isPlaying, setIsPlaying] = React.useState(false);
-  const startTime = React.useRef<number | null>(null);
-  const pausedTime = React.useRef<number | null>(null);
+  const [limitTime, setLimitTime] = useState(60);
+  const [elapsedTimeInMs, setElapsedTimeInMs] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const startTime = useRef<number | null>(null);
+  const pausedTime = useRef<number | null>(null);
 
-  const intervalId = React.useRef<NodeJS.Timeout | null>(null);
+  const intervalId = useRef<NodeJS.Timeout | null>(null);
 
   const elapsedTimeInSeconds = Math.floor(elapsedTimeInMs / 1000);
   const secondUnits = elapsedTimeInSeconds % 10;
@@ -40,13 +39,13 @@ const useTimer = () => {
       pausedTime.current = null;
       TimerWidgetModule.resume();
     } else {
-      TimerWidgetModule.startLiveActivity(startTime.current / 1000, LIMIT_TIME);
+      TimerWidgetModule.startLiveActivity(startTime.current / 1000, limitTime);
     }
 
     intervalId.current = setInterval(() => {
       setElapsedTimeInMs(Date.now() - startTime.current!);
     }, 32);
-  }, []);
+  }, [limitTime]);
 
   const pause = useCallback(() => {
     setIsPlaying(false);
@@ -68,14 +67,14 @@ const useTimer = () => {
 
     TimerWidgetModule.stopLiveActivity();
 
-    TimerWidgetModule.startLiveActivity(startTime.current / 1000, LIMIT_TIME);
+    TimerWidgetModule.startLiveActivity(startTime.current / 1000, limitTime);
 
     intervalId.current = setInterval(() => {
       setElapsedTimeInMs(Date.now() - startTime.current!);
     }, 32);
 
     setIsPlaying(true);
-  }, []);
+  }, [limitTime]);
 
   const reset = useCallback(() => {
     setIsPlaying(false);
@@ -131,6 +130,8 @@ const useTimer = () => {
     reset,
     finishTime,
     value,
+    setLimitTime,
+    limitTime,
     isPlaying,
   };
 };

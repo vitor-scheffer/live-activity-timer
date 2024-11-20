@@ -55,7 +55,7 @@ class TimerWidgetModule: NSObject {
     }
     
     let activityAttributes = TimerWidgetAttributes()
-    let contentState = TimerWidgetAttributes.ContentState(startedAt: startedAt, pausedAt: nil, message: nil)
+    let contentState = TimerWidgetAttributes.ContentState(startedAt: startedAt, pausedAt: nil, limitTime: self.limitTime, message: nil)
     let activityContent = ActivityContent(state: contentState, staleDate: nil)
     do {
       startTimer()
