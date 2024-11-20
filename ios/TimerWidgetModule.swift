@@ -81,7 +81,7 @@ class TimerWidgetModule: NSObject {
   func pause(_ timestamp: Double) -> Void {
     pausedAt = Date(timeIntervalSince1970: timestamp)
     
-    let contentState = TimerWidgetAttributes.ContentState(startedAt: startedAt, pausedAt: pausedAt)
+    let contentState = TimerWidgetAttributes.ContentState(startedAt: startedAt, pausedAt: pausedAt, limitTime: limitTime, message: nil)
     Task {
       resetTimer()
       await currentActivity?.update(
@@ -95,7 +95,7 @@ class TimerWidgetModule: NSObject {
   
   @objc
   func timerEnded() -> Void {
-    let contentState = TimerWidgetAttributes.ContentState(startedAt: nil, pausedAt: nil, message: "Well done!")
+    let contentState = TimerWidgetAttributes.ContentState(startedAt: nil, pausedAt: nil, limitTime: nil, message: "Well done!")
     Task {
       await currentActivity?.update(
         ActivityContent<TimerWidgetAttributes.ContentState>(
@@ -115,7 +115,7 @@ class TimerWidgetModule: NSObject {
     startedAt = Date(timeIntervalSince1970: startDate.timeIntervalSince1970 + elapsedSincePaused)
     pausedAt = nil
     
-    let contentState = TimerWidgetAttributes.ContentState(startedAt: startedAt, pausedAt: nil)
+    let contentState = TimerWidgetAttributes.ContentState(startedAt: startedAt, pausedAt: nil, limitTime: limitTime, message: nil)
     Task {
       startTimer()
       await currentActivity?.update(
