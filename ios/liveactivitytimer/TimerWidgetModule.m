@@ -15,8 +15,8 @@
 
 RCT_EXTERN_METHOD(startLiveActivity:(nonnull double *)timestamp
                            limitTime:(nonnull double *))
-RCT_EXTERN_METHOD(pause:(nonnull double *)timestamp)
-RCT_EXTERN_METHOD(resume)
+RCT_EXTERN_METHOD(pauseTimer:(nonnull double *)timestamp)
+RCT_EXTERN_METHOD(resumeTimer)
 RCT_EXTERN_METHOD(stopLiveActivity)
 RCT_EXTERN_METHOD(timerEnded)
 

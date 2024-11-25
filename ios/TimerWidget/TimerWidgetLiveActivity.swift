@@ -259,7 +259,9 @@ extension TimerWidgetLiveActivity {
       Button(intent: intent) {
         Image(systemName: imageName)
               .imageScale(.medium)
+              .foregroundStyle(.black)
       }
+      .buttonStyle(PlainButtonStyle())
       .padding()
       .background(Color.white)
       .frame(width: 35, height: 35)

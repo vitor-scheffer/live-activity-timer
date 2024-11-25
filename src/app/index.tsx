@@ -1,6 +1,5 @@
 import { StatusBar, View } from "react-native";
 import useTimer from "../hooks/useTimer";
-import { useState } from "react";
 import RoundedButton from "../components/iconButton";
 import CircularProgress from "../components/circularProgress";
 
@@ -29,10 +28,10 @@ export default function Home() {
     pause,
     restart,
     reset,
+    setLimitTime,
     progress,
     isFinished,
     isPlaying,
-    setLimitTime,
     value,
   } = useTimer();
 
@@ -52,7 +51,7 @@ export default function Home() {
     >
       <StatusBar barStyle={"light-content"} backgroundColor="#000" />
       <CircularProgress
-        size={250}
+        size={280}
         strokeWidth={6}
         progress={progress}
         circleColor="#16bbc73b"
@@ -77,6 +76,13 @@ export default function Home() {
             tintColor={"#16bbc7"}
             bgColor={"#16bbc73b"}
           />
+        ) : isFinished ? (
+          <RoundedButton
+            title="Restart"
+            onPress={restart}
+            tintColor={"#d9e3e3"}
+            bgColor={"#d9e3e327"}
+          />
         ) : (
           <RoundedButton
             title="Play"
@@ -86,21 +92,12 @@ export default function Home() {
           />
         )}
 
-        {isPlaying ? (
-          <RoundedButton
-            title="Restart"
-            onPress={restart}
-            tintColor={"#d9e3e3"}
-            bgColor={"#d9e3e327"}
-          />
-        ) : (
-          <RoundedButton
-            title="Close"
-            onPress={reset}
-            tintColor={"#c71916"}
-            bgColor={"#c719163a"}
-          />
-        )}
+        <RoundedButton
+          title="Reset"
+          onPress={reset}
+          tintColor={"#c71916"}
+          bgColor={"#c719163a"}
+        />
       </View>
     </View>
   );

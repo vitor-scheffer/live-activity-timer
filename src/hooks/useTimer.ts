@@ -1,31 +1,73 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { NativeEventEmitter, NativeModule, NativeModules } from "react-native";
+import {
+  NativeEventEmitter,
+  NativeModules,
+  PermissionsAndroid,
+  Platform,
+} from "react-native";
 
-const { TimerWidgetModule } = NativeModules;
+const { TimerWidgetModule, TimerServiceModule, TimerEventEmitter } = NativeModules;
 
-const TimerEventEmitter = new NativeEventEmitter(
-  NativeModules.TimerEventEmitter as NativeModule
+const timerEventEmitter = new NativeEventEmitter(
+  Platform.OS === "android" ? TimerServiceModule : TimerEventEmitter
 );
 
+const TIMER_UPDATE_INTERVAL = 32;
+
 const useTimer = () => {
-  const [limitTime, setLimitTime] = useState(60);
+  const nativeModule =
+    Platform.OS === "android" ? TimerServiceModule : TimerWidgetModule;
+  const [limitTime, setLimitTime] = useState(120);
   const [elapsedTimeInMs, setElapsedTimeInMs] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
+
   const startTime = useRef<number | null>(null);
   const pausedTime = useRef<number | null>(null);
-
   const intervalId = useRef<NodeJS.Timeout | null>(null);
 
-  const elapsedTimeInSeconds = Math.floor(elapsedTimeInMs / 1000);
-  const secondUnits = elapsedTimeInSeconds % 10;
-  const secondTens = Math.floor(elapsedTimeInSeconds / 10) % 6;
-  const minutes = Math.floor(elapsedTimeInSeconds / 60);
+  const formatTime = (ms: number): string => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const secondUnits = seconds % 10;
+    const secondTens = Math.floor((seconds % 60) / 10);
+    return `${minutes}:${secondTens}${secondUnits}`;
+  };
 
-  const value = `${minutes}:${secondTens}${secondUnits}`;
+  const value = formatTime(elapsedTimeInMs);
   const progress = (elapsedTimeInMs / (limitTime * 1000)) * 100;
 
-  const play = useCallback(() => {
+  const startInterval = () => {
+    intervalId.current = setInterval(() => {
+      setElapsedTimeInMs(Date.now() - startTime.current!);
+    }, TIMER_UPDATE_INTERVAL);
+  };
+
+  const removeInterval = () => {
+    if (intervalId.current) {
+      clearInterval(intervalId.current);
+      intervalId.current = null;
+    }
+  };
+
+  const requestNotificationPermission = async () => {
+    if (Platform.OS === "android" && Platform.Version >= 33) {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true;
+  };
+
+  const play = useCallback(async () => {
+    if (Platform.OS === "android" && Platform.Version >= 33) {
+      const permissionGranted = await requestNotificationPermission();
+      if (!permissionGranted) {
+        return;
+      }
+    }
+
     setIsFinished(false);
     setIsPlaying(true);
     if (intervalId.current) {
@@ -40,14 +82,12 @@ const useTimer = () => {
       const elapsedSincePaused = Date.now() - pausedTime.current;
       startTime.current = startTime.current! + elapsedSincePaused;
       pausedTime.current = null;
-      TimerWidgetModule.resume();
+      nativeModule.resumeTimer();
     } else {
-      TimerWidgetModule.startLiveActivity(startTime.current / 1000, limitTime);
+      nativeModule.startLiveActivity(startTime.current / 1000, limitTime);
     }
 
-    intervalId.current = setInterval(() => {
-      setElapsedTimeInMs(Date.now() - startTime.current!);
-    }, 32);
+    startInterval();
   }, [limitTime]);
 
   const pause = useCallback(() => {
@@ -55,7 +95,7 @@ const useTimer = () => {
     removeInterval();
     if (startTime.current && !pausedTime.current) {
       pausedTime.current = Date.now();
-      TimerWidgetModule.pause(pausedTime.current / 1000);
+      nativeModule.pauseTimer(pausedTime.current / 1000);
       setElapsedTimeInMs(pausedTime.current! - startTime.current!);
     }
   }, []);
@@ -69,13 +109,11 @@ const useTimer = () => {
     startTime.current = Date.now();
     pausedTime.current = null;
 
-    TimerWidgetModule.stopLiveActivity();
+    nativeModule.stopLiveActivity();
 
-    TimerWidgetModule.startLiveActivity(startTime.current / 1000, limitTime);
+    nativeModule.startLiveActivity(startTime.current / 1000, limitTime);
 
-    intervalId.current = setInterval(() => {
-      setElapsedTimeInMs(Date.now() - startTime.current!);
-    }, 32);
+    startInterval();
 
     setIsPlaying(true);
   }, [limitTime]);
@@ -87,7 +125,7 @@ const useTimer = () => {
     startTime.current = null;
     pausedTime.current = null;
     setElapsedTimeInMs(0);
-    TimerWidgetModule.stopLiveActivity();
+    nativeModule.stopLiveActivity();
   }, []);
 
   const finishTime = useCallback(() => {
@@ -97,37 +135,22 @@ const useTimer = () => {
     startTime.current = null;
     pausedTime.current = null;
     setElapsedTimeInMs(0);
-    TimerWidgetModule.timerEnded();
+    nativeModule.timerEnded();
   }, []);
 
   useEffect(() => {
-    const pauseSubscription = TimerEventEmitter.addListener("onPause", pause);
-    const resumeSubscription = TimerEventEmitter.addListener("onResume", play);
-    const restartSubscription = TimerEventEmitter.addListener(
-      "onRestart",
-      restart
-    );
-    const resetSubscription = TimerEventEmitter.addListener("onReset", reset);
-    const finishTimeSubscription = TimerEventEmitter.addListener(
-      "onFinish",
-      finishTime
-    );
+    const subscriptions = [
+      timerEventEmitter.addListener("onPause", pause),
+      timerEventEmitter.addListener("onResume", play),
+      timerEventEmitter.addListener("onRestart", restart),
+      timerEventEmitter.addListener("onReset", reset),
+      timerEventEmitter.addListener("onFinish", finishTime),
+    ];
 
     return () => {
-      pauseSubscription.remove();
-      resumeSubscription.remove();
-      restartSubscription.remove();
-      resetSubscription.remove();
-      finishTimeSubscription.remove();
+      subscriptions.forEach((subscriptions) => subscriptions.remove());
     };
   }, [pause, reset, restart, play, finishTime]);
-
-  function removeInterval() {
-    if (intervalId.current) {
-      clearInterval(intervalId.current);
-      intervalId.current = null;
-    }
-  }
 
   return {
     play,
@@ -139,7 +162,7 @@ const useTimer = () => {
     isPlaying,
     value,
     limitTime,
-    progress
+    progress,
   };
 };
 

@@ -64,21 +64,9 @@ class TimerWidgetModule: NSObject {
       // Handle errors not necessary if it's used by adittional feature
     }
   }
-
-  @objc
-  func stopLiveActivity() -> Void {
-    startedAt = nil
-    
-    Task {
-      resetTimer()
-      for activity in Activity<TimerWidgetAttributes>.activities {
-        await activity.end(nil, dismissalPolicy: .immediate)
-      }
-    }
-  }
   
   @objc
-  func pause(_ timestamp: Double) -> Void {
+  func pauseTimer(_ timestamp: Double) -> Void {
     pausedAt = Date(timeIntervalSince1970: timestamp)
     
     let contentState = TimerWidgetAttributes.ContentState(startedAt: startedAt, pausedAt: pausedAt, limitTime: limitTime, message: nil)
@@ -94,20 +82,7 @@ class TimerWidgetModule: NSObject {
   }
   
   @objc
-  func timerEnded() -> Void {
-    let contentState = TimerWidgetAttributes.ContentState(startedAt: nil, pausedAt: nil, limitTime: nil, message: "Well done!")
-    Task {
-      await currentActivity?.update(
-        ActivityContent<TimerWidgetAttributes.ContentState>(
-          state: contentState,
-          staleDate: nil
-        )
-      )
-    }
-  }
-  
-  @objc
-  func resume() -> Void {
+  func resumeTimer() -> Void {
     guard let startDate = self.startedAt else { return }
     guard let pauseDate = self.pausedAt else { return }
     
@@ -118,6 +93,31 @@ class TimerWidgetModule: NSObject {
     let contentState = TimerWidgetAttributes.ContentState(startedAt: startedAt, pausedAt: nil, limitTime: limitTime, message: nil)
     Task {
       startTimer()
+      await currentActivity?.update(
+        ActivityContent<TimerWidgetAttributes.ContentState>(
+          state: contentState,
+          staleDate: nil
+        )
+      )
+    }
+  }
+
+  @objc
+  func stopLiveActivity() -> Void {
+    startedAt = nil
+    
+    Task {
+      resetTimer()
+      for activity in Activity<TimerWidgetAttributes>.activities {
+        await activity.end(nil, dismissalPolicy: .immediate)
+      }
+    }
+  }
+  
+  @objc
+  func timerEnded() -> Void {
+    let contentState = TimerWidgetAttributes.ContentState(startedAt: nil, pausedAt: nil, limitTime: nil, message: "Well done!")
+    Task {
       await currentActivity?.update(
         ActivityContent<TimerWidgetAttributes.ContentState>(
           state: contentState,
