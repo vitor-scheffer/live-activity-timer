@@ -5,11 +5,9 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.core.app.ServiceCompat.stopForeground
 import com.anonymous.liveactivitytimer.TimerService.Companion.ACTION_FINISH
 import com.anonymous.liveactivitytimer.TimerService.Companion.ACTION_PAUSE
 import com.anonymous.liveactivitytimer.TimerService.Companion.ACTION_RESUME
-import com.anonymous.liveactivitytimer.TimerService.Companion.ACTION_STOP
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod

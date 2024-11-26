@@ -28,7 +28,9 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
   const [selectedValue, setSelectedValue] = useState(60);
   const radius = size / 2 - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (progress / 100) * circumference;
+
+  const effectiveProgress = Math.min(progress, 100);
+  const offset = circumference - (effectiveProgress / 100) * circumference;
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
@@ -54,7 +56,7 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
-          strokeDashoffset={offset}
+          strokeDashoffset={progress > 100 ? 0 : offset}
           strokeLinecap="round"
         />
       </Svg>
